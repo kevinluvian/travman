@@ -1,0 +1,135 @@
+<html >
+<head>
+  <title>Addon Window</title>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <script src="../app/js/BuildingTable.js"></script>
+  <script src="../app/js/angular.min.js"></script>
+  <script src="../app/js/angular-sanitize.min.js"></script>
+  <script src="../app/js/jquery.min.js"></script>
+  <script src="../app/js/ng-google-chart.min.js" type="text/javascript"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="../app/js/bootstrap.min.css">
+
+</head>
+<body >
+ <div class="container" ng-app="app" ng-controller="mainController">
+ <div style="text-align:center">TravianTactics v{{BotVersion}}
+      <select ng-model="lang" ng-options="language for language in languages" ng-change="changeLang()"></select></div>
+ <div ng-show="diffVersion" class="bg-danger">
+   Please Download new version:<a ng-href="{{NewBotLink}}" target="_blank">TravianTactics v{{NewBotVersion}}</a>
+ </div>
+   <div><button  ng-model="but" ng-click="startBot()">{{startStatus}}</button> 
+
+      <button ng-click="(selectedOption-1)<0 ?selectedOption= player.villages.length-1 : selectedOption=selectedOption-1 "><</button>
+      <select ng-model="selectedOption" ng-options="player.villages.indexOf(x) as x.name  | limitTo: 15 for x in player.villages"></select>
+      <button ng-click="selectedOption = (selectedOption + 1)%player.villages.length">></button> 
+    </div>
+    <div class="row">
+      <ul class="nav nav-tabs ">
+        <li ui-sref-active><button ng-model="option" ng-click='option = 1' class="btn " ><img src="img/hammer.jpg"   width="26" height="30"/></button></li>
+        <li ui-sref-active><button ng-model="option" ng-click='option = 2'  class="btn " ><img src="img/lybra.jpg"  width="26" height="30" /></button></li>
+        <li ui-sref-active><button ng-model="option" ng-click='option = 3' class="btn " ><img src="img/farm.png"   width="26" height="30"/></button></li>
+        <li ui-sref-active><button ng-model="option" ng-click='option = 4' class="btn " ><img src="img/hero.jpg"  width="26" height="30"/></button></li>
+        <li ui-sref-active><button ng-model="option" ng-click='option = 5' class="btn " ><img src="img/options.jpg"  width="26" height="30"/></button></li>
+      </ul>
+    </div>
+    <div>
+      <div ng-show="option == 1"><br />
+        <table>
+          <tr><td>
+          <select ng-model='building'  ng-options='number.locationId + ", " +(setbuildingName(number.buildingType,false)| limitTo: 20)  +" lvl " + number.lvl for number in player.villages[selectedOption].buildings track by number.locationId ' ng-change="buildingChanged(building)"  ></select></td></tr>
+          <tr><td><select ng-init="level = numbers[0]" ng-model='level'  ng-options='"To level: "+number for number in numbers'  ></select></td></tr>
+          <tr ng-show="buildingTypeSelect"><td><select ng-model='buildingType'  ng-options='idx as Stavba | limitTo: 25 for (idx,Stavba) in buldings'  ></select></td></tr>
+          <tr><td><button ng-model="button"  ng-click="addBuildingTask(building,level,buildingType)">Add Task</button></td>
+          </tr>
+        </table>
+        <div ng-repeat="task in player.tasks.build| filter:villageTask">
+          <span>{{task.building.locationId}}|<label ng-bind-html="setbuildingName(task.building.buildingType,true)">{{setbuildingName(task.building.buildingType)}}</label>| To level:  {{task.toLvl}}<button ng-model="button"  ng-click="removeTask(task.id)">x</button>
+          </span>
+        </div>
+      </div>
+      <div ng-show="option == 2"  class="row"><br />
+        <div  class="center-block" style="text-align: center">
+           <h3> {{player.villages[selectedOption].name}}[{{player.villages[selectedOption].coordinates.x}},{{player.villages[selectedOption].coordinates.y}}] </h3>
+          <label>r1: </label><input type="text"  ng-model="taskTrade.from.r1"  maxlength="2" style="width:25px"/>%
+          <label>r2: </label><input type="text"  ng-model="taskTrade.from.r2"  maxlength="2" style="width:25px"/>%
+          <label>r3: </label><input type="text"  ng-model="taskTrade.from.r3"  maxlength="2" style="width:25px"/>%
+          <label>r4: </label><input type="text"  ng-model="taskTrade.from.r4"  maxlength="2" style="width:25px"/>%
+          <br />
+          <br />
+          <img src="img/arrow.png"   width="100" height="40"/>
+          <br />
+          <br />
+          <select ng-model="taskTrade.villageTo" ng-options="x as x.name for x in player.villages | filter:filterVillage track by x.villageId" ></select>
+          <br />
+          <label>r1: </label><input type="text"  ng-model="taskTrade.to.r1"  maxlength="2" style="width:25px"/>%
+          <label>r2: </label><input type="text"  ng-model="taskTrade.to.r2"  maxlength="2" style="width:25px"/>%
+          <label>r3: </label><input type="text"  ng-model="taskTrade.to.r3"  maxlength="2" style="width:25px"/>%
+          <label>r4: </label><input type="text"  ng-model="taskTrade.to.r4"  maxlength="2" style="width:25px"/>%
+          <br />
+           <label>min resources: </label><input type="text"  ng-model="taskTrade.minRes"  maxlength="2" style="width:55px"/>
+          <div>
+          </div>
+          <button  ng-model="button"  ng-click="addTradingTask()">Add trade task</button>
+        </div>
+        <div ng-repeat="task in player.tasks.trade | filter:villageTask2">
+          <span><pre>{{task.villageFrom.name}}({{task.from | json}})-->{{task.villageTo.name}}({{task.to | json}})<button ng-model="button"  ng-click="removeTask(task.id)">x</button></pre></span>
+        </div>
+      </div>
+      <div ng-show="option == 3">
+        <br />
+        <input type="checkbox" ng-model="player.villages[selectedOption].farmOn" ng-checked="player.villages[selectedOption].farmOn" ng-change="changeFarmOn()">Enable farming
+        <button ng-model="button"  ng-click="showFarms()"><img src="img/find.png"   width="40" height="40"/></button>
+        <button ng-model="button"  ng-click="showReports()"><img src="img/chart.png"   width="40" height="40"/></button>
+        <br />
+        <table  style="font-size: 11px;" class="table table-hover table-condensed table-bordered text-center">
+          <thead>
+            <tr>
+              <th>Name</th><th>T1</th><th>T2</th><th>T4</th><th>T4</th><th>T5</th><th>T6</th><th><button ng-model="button"  ng-click="removeFarmlist()">x</button></th>
+            </tr>
+          </thead>
+          <tbody >
+            <tr ng-repeat="task in player.tasks.farms | filter:filterVillageFarm track by $index">
+            <td>{{task.name| limitTo: 5}}</td><td>{{task.troops.t1}}</td><td>{{task.troops.t2}}</td><td>{{task.troops.t3}}</td><td>{{task.troops.t4}}</td><td>{{task.troops.t5}}</td><td>{{task.troops.t6}}</td><td><button ng-model="button"  ng-click="removeTask(task.id)">x</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div ng-show="option == 4">
+          <label>t1: </label><input type="text"  ng-model="player.tasks.train[selectedOption].t1" ng-change="changeTroops()" /><br />
+          <label>t2: </label><input type="text"  ng-model="player.tasks.train[selectedOption].t2" ng-change="changeTroops()" /><br />
+          <label>t3: </label><input type="text"  ng-model="player.tasks.train[selectedOption].t3" ng-change="changeTroops()" /><br />
+          <label>t4: </label><input type="text"  ng-model="player.tasks.train[selectedOption].t4" ng-change="changeTroops()" /><br />
+          <label>t5: </label><input type="text"  ng-model="player.tasks.train[selectedOption].t5" ng-change="changeTroops()" /><br />
+          <label>t6: </label><input type="text"  ng-model="player.tasks.train[selectedOption].t6" ng-change="changeTroops()" /><br />
+          <label>t7: </label><input type="text"  ng-model="player.tasks.train[selectedOption].t7" ng-change="changeTroops()" /><br />
+          <label>t8: </label><input type="text" ng-model="player.tasks.train[selectedOption].t8" ng-change="changeTroops()" /><br />
+          <label>t9: </label><input type="text" ng-model="player.tasks.train[selectedOption].t9" ng-change="changeTroops()" /><br />
+          <label>t10: </label><input type="text"  ng-model="player.tasks.train[selectedOption].t10" ng-change="changeTroops()" /><br />
+          <label>Train every minutes: </label><input type="text" ng-model="player.tasks.train[selectedOption].time" ng-change="changeTroops()"/><br />
+      </div>
+      <div ng-show="option == 5">
+      <br />
+        Coupon for golder 4.4: {{golderCoupon}} <a ng-click="openWindow()">Golder Website</a>
+        <br /><input type="checkbox" ng-model="player.tasks.hero" ng-checked="player.tasks.hero" ng-change="changeHeroOn()">Adventure
+        <br /><input type="checkbox" ng-model="player.tasks.campsRobbing.status" ng-checked="player.tasks.campsRobbing.status" ng-change="changeCampsRobbing()">Camps robbing
+        <select ng-model="player.tasks.campsRobbing.village" ng-options="x as x.name for x in player.villages track by x.villageId"  ng-change="changeCampsRobbing()"></select>
+
+        <div ng-repeat="log in logs">
+          <span><pre>{{log}}</pre></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modules -->
+  <script src="../app/app.js"></script>
+
+  <!-- Controllers -->
+  <script src="../app/controllers/mainController.js"></script>
+  <!-- Services -->
+  <script src="../app/directives/socket.js"></script>
+
+  <!-- Directives -->
+</body>
+</html>

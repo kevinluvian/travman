@@ -1,0 +1,13 @@
+{
+  "title": "TravianTacticsV5Bot",
+  "name": "traviantacticsv5bot",
+  "version": "2.0.11",
+  "description": "Bot for travian Kingdoms",
+  "main": "lib/main.js",
+  "author": "Mitja Santl",
+  "engines": {
+    "firefox": ">=38.0a1",
+    "fennec": ">=38.0a1"
+  },
+  "license": "MIT"
+}

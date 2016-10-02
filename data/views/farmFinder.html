@@ -1,0 +1,112 @@
+<html >
+<head>
+	<title>Addon Window</title>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+	<script src="../app/js/BuildingTable.js"></script>
+	<script src="../app/js/angular.min.js"></script>
+  <script src="../app/js/angular-sanitize.min.js"></script>
+	<script src="../app/js/jquery.min.js"></script>
+	<script src="../app/js/ng-google-chart.min.js" type="text/javascript"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="../app/js/bootstrap.min.css">
+
+</head>
+<body >
+	<div class="container" ng-app="app" ng-controller="farmFinderController" style="text-align:center;">
+		<!-- <button ng-model="button"  ng-click="hideFarmList()">Close</button>-->
+		<div data-ng-show="!showFarmReports">
+			<h1> FARM REPORTS</h1>
+			<div class="row">
+			    <div class="col-lg-1 col-centered">
+					<div google-chart chart="chartObject"></div>
+			    </div>
+			</div>
+		</div>
+		<div data-ng-show="showFarmReports">
+			<h1> FARM FINDER</h1>
+			<div>
+				<label>x: </label><input type="text" name="cx" ng-model="coordinate.x" /><br />
+				<label>y: </label><input type="text" name="cy" ng-model="coordinate.y"  /><br />
+				<button ng-model="button"  ng-click="farmsSearch()">Search</button><br />
+			</div>
+			<div ng-show="player.farms.length >0">
+				<div>
+					<label>Is king: </label><input type="checkbox" ng-model="filerOptions.isKing" ng-checked="filerOptions.isKing" ng-change="filteredVillages=[]">
+					<label>No king: </label><input type="checkbox" ng-model="filerOptions.noKing" ng-checked="filerOptions.noKing" ng-change="filteredVillages=[]">
+					<label>Innactive: </label><input type="checkbox" ng-model="filerOptions.innactive" ng-checked="filerOptions.innactive" ng-change="filteredVillages=[]">
+					 <label>radius: </label><input type="text" name="radius" ng-model="coordinate.radius" value="1"  style="width:35px" ng-change="filteredVillages=[]"/>
+					 <label>maxPop: </label><input type="text" ng-model="maxPop"   maxlength="4" style="width:45px" ng-change="filteredVillages=[]"/>
+					 <label>minPop: </label><input type="text" ng-model="minPop"   maxlength="4" style="width:45px" ng-change="filteredVillages=[]"/>
+					 <label><img ng-src="img/AttackWithoutLosses.png" height="20px" width="20px" ng-model="attacksGreen" ng-click="setFilerAttacks(1)"/>  </label>
+					 <label><img ng-src="img/AttackWithLosses.png" height="20px" width="20px" ng-model="attacksYellow" data-ng-click="setFilerAttacks(2)"/>  </label>
+					 <label><img ng-src="img/AttackLost.png" height="20px" width="20px" ng-model="attacksRed" ng-click="setFilerAttacks(3)" /> </label>
+				</div>
+				<table  class="table table-hover table-condensed table-bordered text-center">
+					<thead>
+						<tr>
+							<th><input type="checkbox" ng-model="selectAll" ng-checked="selectAll" ng-change="selectAllFarms()"></th>
+							<th>Village</th><th>Player</th>
+							<th>Distance</th><th>Population</th><th>Active</th>
+							<th>Alliance</th><th>LastReport</th><th>RaidType</th>
+						</tr>
+					</thead>
+					<tbody  ng-repeat="farm in player.farms | filter:filerFarm track by farm.id" ng-init='filteredVillages=[]'>
+						<tr ng-repeat="village in saveVillages( (farm.villages | filter:filerVillage)) track by village.villageId">
+							<td><input type="checkbox" ng-model="village.active" ng-checked="village.active"></td>
+							<td>{{village.name | limitTo: 9}}</td>
+							<td>{{farm.name}}</td>
+							<td>{{Math.sqrt(((village.x-coordinate.x)*(village.x-coordinate.x))+((village.y-coordinate.y)*(village.y-coordinate.y))).toFixed()| limitTo: 3}}</td>
+							<td>{{village.population}}</td>
+							<td>{{farm.active}}</td>
+							<td>{{farm.ally.name}}</td>
+							<td>{{village.lastReport.raidedResSum}}/{{village.lastReport.capacity}}</td>
+							<td ><img ng-src={{showReportImage(village.lastReport.notificationType)}} height="20px" width="20px" ng-show="village.lastReport.notificationType==1||village.lastReport.notificationType==2||village.lastReport.notificationType==3||village.lastReport.notificationType==118||village.lastReport.notificationType==119||village.lastReport.notificationType==120"></td>
+						</tr>
+					</tbody >
+				</table>
+				<div>
+					<table  style="width:100%; text-align:center;">
+					<thead style="text-align:center">
+						<tr>
+							<td>T1</td>
+							<td>T2</td>
+							<td>T3</td>
+							<td>T4</td>
+							<td>T5</td>
+							<td>T6</td>
+							<td></td>
+							<td></td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><input size="6" type="text"  ng-model="troops.t1" value="0" /></td>
+							<td><input size="6" type="text"  ng-model="troops.t2" value="0" /></td>
+							<td><input size="6" type="text"  ng-model="troops.t3" value="0" /></td>
+							<td><input size="6" type="text"  ng-model="troops.t4" value="0" /></td>
+							<td><input size="6" type="text"  ng-model="troops.t5" value="0" /></td>
+							<td><input size="6" type="text"  ng-model="troops.t6" value="0" /></td>
+							<td><select ng-model="village" ng-options="x as x.name for x in player.villages track by x.villageId"></select></td>
+							<td><button ng-model="button"  ng-click="addFarms()">Add farms</button></td>
+						</tr>
+					</tbody >
+					</table>
+				</div>
+			</div>
+			<br />
+			<br />
+			<br />
+		</div>
+	</div>
+	<!-- Modules -->
+	<script src="../app/app.js"></script>
+
+	<!-- Controllers -->
+	<script src="../app/controllers/farmFinderController.js"></script>
+	<!-- Services -->
+	
+
+	<!-- Directives -->
+</body>
+</html>
